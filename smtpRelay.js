@@ -2,8 +2,8 @@ const { SMTPServer } = require("smtp-server");
 const axios = require("axios");
 const { simpleParser } = require("mailparser");
 
-const AUTH_USERNAME = 'unsend';
-const UNSEND_BASE_URL = 'https://unsend.loco.ltd';
+const AUTH_USERNAME = process.env.AUTH_USERNAME || 'unsend';
+const UNSEND_BASE_URL = process.env.UNSEND_BASE_URL || 'https://unsend.dev/';
 
 async function sendEmailToUnsend(emailData, apiKey) {
   try {
@@ -48,8 +48,6 @@ const createSMTPServer = (port) => {
           return callback(new Error("No API key found in session"));
         }
 
-        // console.log(parsed)
-
         const emailObject = {
           to: Array.isArray(parsed.to) ? parsed.to.map(addr => addr.text).join(", ") : parsed.to?.text,
           from: Array.isArray(parsed.from) ? parsed.from.map(addr => addr.text).join(", ") : parsed.from?.text,
@@ -86,7 +84,6 @@ const createSMTPServer = (port) => {
 };
 
 const server587 = createSMTPServer(587);
-
 server587.listen(587, () => {
   console.log("SMTP server is running on port 587");
 });

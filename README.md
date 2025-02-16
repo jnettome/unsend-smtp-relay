@@ -1,58 +1,81 @@
-docker run -p 8025:25 -p 8587:587 smtp-relay
+# SMTP Proxy to Unsend API (unsend-smtp-relay)
+
+This project implements a simple SMTP server that proxies incoming emails to the [Unsend](https://unsend.dev/) API. Emails received by the server are parsed and forwarded to Unsend via their API.
+
+## Features
+- Runs an SMTP server on port 587
+- Requires authentication using a username and API key as password
+- Parses incoming emails and forwards them to Unsend API
+- Supports attachments (converted to base64 format)
+- Logs responses and errors for debugging
+
+## Requirements
+- Node.js (latest LTS recommended)
+- `npm` or `yarn`
+- Docker (for containerized deployment)
+
+## How It Works
+
+1. The SMTP server listens on port `587` (or `8587` when using Docker).
+2. Clients must authenticate using `AUTH_USERNAME` and an API key as the password.
+3. Incoming emails are parsed and structured.
+4. The email content, including attachments (base64-encoded), is sent to the Unsend API.
+5. Responses and errors are logged.
 
 
+## Configuration
 
-swaks --to hi@omeujp.com --from jp@pixta.me --server localhost --port 8587 --auth LOGIN --auth-user unsend --auth-password "us_e54715p6ov_50d074b6fcd1784c76a37e3b79287ca5" --data "Subject: Test Email\n\nThis is a test." --tls
+Set the following environment variables:
+
+```sh
+AUTH_USERNAME=unsend
+UNSEND_BASE_URL=https://your-selfhosted.unsend-instance.com/
+```
+
+- `AUTH_USERNAME`: The username required for SMTP authentication.
+- `UNSEND_BASE_URL`: The base URL for the Unsend API.
+
+## Docker Support
+
+To run the server using Docker, use the provided `Dockerfile`:
+
+1. Build the Docker image:
+   ```sh
+   docker build -t smtp-relay .
+   ```
+
+2. Run the container:
+   ```sh
+   docker run -p 8587:587 smtp-relay
+   ```
+
+### Development
+
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/jnettome/unsend-smtp-relay.git
+   cd unsend-smtp-relay
+   ```
+
+2. Install dependencies:
+   ```sh
+   npm install
+   ```
+3. Start the SMTP server:
+  ```sh
+  node server.js
+  ```
 
 
+## Testing the SMTP Server
 
+You can test the SMTP server using [`swaks`](https://linux.die.net/man/1/swaks):
 
+```sh
+swaks --to destination@email.com --from your-email@valid-domain.com --server localhost --port 8587 --auth LOGIN --auth-user unsend --auth-password "us_e54732190832190832_API_KEY" --data "Subject: Test Email\n\nThis is a test." --tls
+```
 
-
-
-Received email: {
-  attachments: [],
-  headers: Map(8) {
-    'date' => 2025-02-15T18:36:52.000Z,
-    'from' => {
-      value: [Array],
-      html: '<span class="mp_address_group"><span class="mp_address_name">pixta</span> &lt;<a href="mailto:time@pixta.me" class="mp_address_email">time@pixta.me</a>&gt;</span>',
-      text: '"pixta" <time@pixta.me>'
-    },
-    'to' => {
-      value: [Array],
-      html: '<span class="mp_address_group"><a href="mailto:hi@joaonetto.me" class="mp_address_email">hi@joaonetto.me</a></span>',
-      text: 'hi@joaonetto.me'
-    },
-    'message-id' => '<67b0dec4cf84c_1100e1dd89505b@beanchine.mail>',
-    'subject' => 'pixta: código 123456 ✨',
-    'mime-version' => '1.0',
-    'content-type' => { value: 'multipart/alternative', params: [Object] },
-    'content-transfer-encoding' => '7bit'
-  },
-  headerLines: [
-    { key: 'date', line: 'Date: Sat, 15 Feb 2025 15:36:52 -0300' },
-    { key: 'from', line: 'From: pixta <time@pixta.me>' },
-    { key: 'to', line: 'To: hi@joaonetto.me' },
-    {
-      key: 'message-id',
-      line: 'Message-ID: <67b0dec4cf84c_1100e1dd89505b@beanchine.mail>'
-    },
-    {
-      key: 'subject',
-      line: 'Subject: =?UTF-8?Q?pixta:_c=C3=B3digo_123456_=E2=9C=A8?='
-    },
-    { key: 'mime-version', line: 'Mime-Version: 1.0' },
-    {
-      key: 'content-type',
-      line: 'Content-Type: multipart/alternative;\r\n' +
-        ' boundary="--==_mimepart_67b0dec4cec66_1100e1dd894913";\r\n' +
-        ' charset=UTF-8'
-    },
-    {
-      key: 'content-transfer-encoding',
-      line: 'Content-Transfer-Encoding: 7bit'
-    }
-  ],
-  html: '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n' +
-    '<html lang="
+## Dependencies
+- [smtp-server](https://www.npmjs.com/package/smtp-server)
+- [axios](https://www.npmjs.com/package/axios)
+- [mailparser](https://www.npmjs.com/package/mailparser)
